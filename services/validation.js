@@ -1,15 +1,11 @@
 const Joi = require("joi");
 
-const schemaCreateContact = Joi.object({
-  name: Joi.string().alphanum().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().min(7).max(12).required(),
-});
-
-const schemaUpdateContact = Joi.object({
-  name: Joi.string().alphanum().min(3).max(30).optional(),
-  email: Joi.string().email().optional(),
-  phone: Joi.string().min(7).max(12).optional(),
+const schemaContactValidation = Joi.object({
+  name: Joi.string().alphanum().min(3).max(30),
+  email: Joi.string().email(),
+  phone: Joi.string().min(7).max(12),
+  password: Joi.string().min(5).max(12),
+  subscription: Joi.string(),
 });
 
 const validate = (schema, obj, next) => {
@@ -24,10 +20,6 @@ const validate = (schema, obj, next) => {
   next();
 };
 
-module.exports.createContact = (req, _res, next) => {
-  return validate(schemaCreateContact, req.body, next);
-};
-
-module.exports.updateContact = (req, _res, next) => {
-  return validate(schemaUpdateContact, req.body, next);
+module.exports.schemaContactValidation = (req, _res, next) => {
+  return validate(schemaContactValidation, req.body, next);
 };
