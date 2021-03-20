@@ -8,10 +8,10 @@ const guard = (req, res, next) => {
     const INDEX_TOKEN = 1;
     const token = req.get("Authorization")?.split(" ")[INDEX_TOKEN];
     if (!user || err || token !== user.token) {
-      return res.status(HttpCode.FORBIDDEN).json({
+      return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
-        code: HttpCode.FORBIDDEN,
-        data: "Forbidden",
+        code: HttpCode.UNAUTHORIZED,
+        data: "UNAUTHORIZED",
         message: "Access denied",
       });
     }
