@@ -1,0 +1,61 @@
+const { users } = require("./data");
+const bcrypt = require("bcryptjs");
+
+const findByEmail = jest.fn((email) => {
+  const [user] = users.filter(
+    (element) => String(element.email) === String(email)
+  );
+  return user;
+});
+
+const findById = jest.fn((id) => {
+  const [user] = users.filter((element) => String(element._id) === String(id));
+  return user;
+});
+
+const create = jest.fn(({ email, password }) => {
+  const pass = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+  const newUser = {
+    email,
+    password: pass,
+    _id: "604780b0a33f593b5866d7ad",
+    validPassword: function (pass) {
+      return bcrypt.compareSync(pass, this.password);
+    },
+  };
+  users.push(newUser);
+  return newUser;
+});
+
+const updateToken = jest.fn((id, token) => {
+  const [user] = users.filter((element) => String(element._id) === String(id));
+  if (user) {
+    user.token = token;
+  }
+  return {};
+});
+
+const updateSubscription = jest.fn((id, subscription) => {
+  const [user] = users.filter((element) => String(element._id) === String(id));
+  if (user) {
+    user.subscription = subscription;
+  }
+  return user;
+});
+
+const updateAvatar = jest.fn((id, avatarURL) => {
+  const [user] = users.filter((element) => String(element._id) === String(id));
+  if (user) {
+    user.avatarURL = avatarURL;
+  }
+  return user.avatarURL;
+});
+
+module.exports = {
+  findByEmail,
+  findById,
+  create,
+  updateToken,
+  updateSubscription,
+  updateAvatar,
+};
