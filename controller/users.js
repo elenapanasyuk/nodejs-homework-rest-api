@@ -3,8 +3,11 @@ const Users = require("../model/users");
 const fs = require("fs").promises;
 const path = require("path");
 const Jimp = require("jimp");
+
 const { HttpCode } = require("../helpers/constants");
+const EmailService = require("../services/email");
 const createFolderIsExist = require("../helpers/create-dir");
+const { nanoid } = require("nanoid");
 require("dotenv").config();
 const SECRET_KEY = process.env.JWT_SECRET;
 
@@ -20,7 +23,11 @@ const register = async (req, res, next) => {
         message: "Email is already been used",
       });
     }
-    const newUser = await Users.create(req.body);
+    const verificationToken = nanoid();
+    const emailService = new EmailService(process.env.NODE_ENV);
+    await emailService.sendEmail(verificationToken, email);
+
+    const newUser = await Users.create({ ...req.body, verificationToken });
     return res.status(HttpCode.CREATED).json({
       status: "success",
       code: HttpCode.CREATED,
@@ -43,7 +50,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
     const isPasswordValid = await user?.validPassword(password);
-    if (!user || !isPasswordValid) {
+    if (!user || !isPasswordValid || !user.verificationToken) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
@@ -168,6 +175,28 @@ const saveAvatarToStatic = async (req) => {
   return avatarUrl;
 };
 
+const verify = async (req, res, next) => {
+  try {
+    const user = await Users.findByVerificationToken(req.params.token);
+    if (user) {
+      await Users.updateVerificationToken(user.id, null);
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        message: "Verification successful!",
+      });
+    }
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "error",
+      code: HttpCode.BAD_REQUEST,
+      data: "Bad request",
+      message: "User is not found",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -175,4 +204,5 @@ module.exports = {
   currentUser,
   updateSubscription,
   avatars,
+  verify,
 };
