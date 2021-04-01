@@ -14,7 +14,7 @@ jest.mock("../model/contacts.js");
 jest.mock("../model/users.js");
 
 describe("Testing: route api/users/auth", () => {
-  it("Registration should return status 201 ", async (done) => {
+  it("Registration should return status 201 ", async () => {
     const res = await request(app)
       .post("/api/users/auth/register")
       .send(newUser)
@@ -22,11 +22,9 @@ describe("Testing: route api/users/auth", () => {
 
     expect(res.status).toEqual(201);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Email has already been used should return status 409", async (done) => {
+  it("Email has already been used should return status 409", async () => {
     const res = await request(app)
       .post("/api/users/auth/register")
       .send(newUser)
@@ -34,23 +32,19 @@ describe("Testing: route api/users/auth", () => {
 
     expect(res.status).toEqual(409);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Login should return status 200", async (done) => {
+  it("Login should return status 200", async () => {
     const res = await request(app)
-      .post(`/api/users/auth/login`)
+      .post("/api/users/auth/login")
       .send(newUser)
       .set("Accept", "application/json");
 
     expect(res.status).toEqual(200);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Login should return status 400", async (done) => {
+  it("Login should return status 400", async () => {
     const res = await request(app)
       .post("/api/users/auth/login")
       .send({ email: "mail@mail.com", password: "9999" })
@@ -58,57 +52,47 @@ describe("Testing: route api/users/auth", () => {
 
     expect(res.status).toEqual(400);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Valid token for current user should return status 200", async (done) => {
+  it("Valid token for current user should return status 200", async () => {
     const res = await request(app)
       .get("/api/users/current")
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toEqual(200);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Absence of token for current user should return status 401", async (done) => {
+  it("Absence of token for current user should return status 401", async () => {
     const res = await request(app)
       .get(`/api/users/current`)
       .set("Authorization", "");
 
     expect(res.status).toEqual(401);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Invalid token for current user should return status 401", async (done) => {
+  it("Invalid token for current user should return status 401", async () => {
     const res = await request(app)
       .get(`/api/users/current`)
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toEqual(401);
     expect(res.body).toBeDefined();
-
-    done();
   });
 
-  it("Upload avatar should return status 200", async (done) => {
+  it("Upload avatar should return status 200", async () => {
     const buffer = await fs.readFile("./test/test-avatar.jpg");
     const res = await request(app)
-      .patch(`/api/users/avatars`)
+      .patch("/api/users/avatars")
       .set("Authorization", `Bearer ${token}`)
       .attach("avatar", buffer, "test-avatar.jpg");
 
     expect(res.status).toEqual(200);
     expect(res.body).toBeDefined();
     expect(res.body.data).toHaveProperty("avatarUrl");
-
-    done();
   });
-  it("Invalid token while uploading avatar should return status 401", async (done) => {
+  it("Invalid token while uploading avatar should return status 401", async () => {
     const buffer = await fs.readFile("./test/test-avatar.jpg");
     const res = await request(app)
       .patch(`/api/users/avatars`)
@@ -116,6 +100,5 @@ describe("Testing: route api/users/auth", () => {
       .attach("avatar", buffer, "test-avatar.jpg");
 
     expect(res.status).toEqual(401);
-    done();
   });
 });
